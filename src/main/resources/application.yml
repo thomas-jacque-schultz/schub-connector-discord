@@ -13,9 +13,6 @@ discord:
   admin:
     id: ${DISCORD_ADMIN_ID}
     username: ${DISCORD_ADMIN_USERNAME}
-portainer:
-  base-url: ${PORTAINER_VIRTUAL_HOST}
-  token: ${PORTAINER_TOKEN}
 
 # Secret partagé par tous les services Schub.
 schub:
@@ -29,6 +26,15 @@ connector:
     base-url: ${CONNECTOR_FREEBOX_URL:http://connector-freebox:8080}
     connect-timeout: 3s
     read-timeout: 8s
+  # Depuis la phase 2, ce service ne sonde plus Portainer : le connecteur le fait une fois
+  # par minute pour tout le monde et sert un cache daté. Le jeton d'API vit chez lui.
+  portainer:
+    base-url: ${CONNECTOR_PORTAINER_URL:http://connector-portainer:8080}
+    # Doit rester supérieur à la période de sonde du connecteur, sinon toute lecture
+    # serait déclarée périmée.
+    stale-after: ${CONNECTOR_PORTAINER_STALE_AFTER:5m}
+    connect-timeout: 3s
+    read-timeout: 10s
 
 # Politique d'ouverture des ports. Rien ici ne dépend de la marque du routeur.
 port-forwarding:

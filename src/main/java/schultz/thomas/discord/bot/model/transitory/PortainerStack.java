@@ -1,19 +1,19 @@
 package schultz.thomas.discord.bot.model.transitory;
 
+import java.time.Instant;
+
 /**
- * Une stack telle que Portainer la connaît, réduite à ce qui sert à la choisir.
+ * Une stack telle que le connecteur Portainer la rapporte.
  *
- * <p>Sert à lier un serveur de jeu à sa stack sans saisie manuelle : {@code portainerStackId}
- * est une clé de liaison, et une faute de frappe dessus ne se voit qu'au premier démarrage
- * raté.</p>
- *
- * @param running état au moment de la lecture ; purement indicatif, il aide à reconnaître la
- *                bonne stack dans une liste, mais ne doit pas être traité comme un état courant
+ * @param observedAt date de la lecture qui a produit cette valeur. Les réponses du connecteur
+ *                   viennent d'un cache : sans cette date, démarrer une stack puis relire
+ *                   aussitôt conclurait qu'elle est toujours éteinte.
  */
 public record PortainerStack(
         Integer id,
         String name,
         Integer endpointId,
-        boolean running
+        boolean running,
+        Instant observedAt
 ) {
 }
