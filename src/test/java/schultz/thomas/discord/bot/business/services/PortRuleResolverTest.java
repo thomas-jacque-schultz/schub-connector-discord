@@ -37,7 +37,10 @@ class PortRuleResolverTest {
     void setUp() {
         properties = new PortForwardingProperties();
         properties.setDefaultLanIp("192.168.1.202");
-        resolver = new PortRuleResolver(properties, gamingServerService);
+        // Le fournisseur pointe sur les propriétés : chaque test continue de déclarer ses
+        // règles permanentes via properties.setStaticRules(...), comme avant leur passage
+        // en base. Le resolver ne sait pas d'où vient la liste, c'est tout l'intérêt.
+        resolver = new PortRuleResolver(properties, gamingServerService, properties::getStaticRules);
     }
 
     @Test
