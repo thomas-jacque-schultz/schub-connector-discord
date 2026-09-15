@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import schultz.thomas.discord.bot.model.transitory.DockerContainerState;
+import schultz.thomas.discord.bot.model.transitory.PortainerStack;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -46,6 +49,42 @@ public class PortainerRequestService implements ContainerRequestService {
             portainerErrorLogger.logRestClientException("stop-stack", String.valueOf(stackId), e);
             throw e;
         }
+    }
+
+    @Override
+    public List<PortainerStack> listStacks() {
+        try {
+            List<Map<String, Object>> stacks = restClient.get()
+                    .uri("/api/stacks")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+
+            if (stacks == null) {
+                return List.of();
+            }
+            return stacks.stream()
+                    .map(this::toStack)
+                    .sorted(Comparator.comparing(PortainerStack::name, Comparator.nullsLast(String::compareToIgnoreCase)))
+                    .toList();
+        } catch (RestClientException e) {
+            portainerErrorLogger.logRestClientException("list-stacks", "all", e);
+            throw e;
+        }
+    }
+
+    /** Portainer capitalise ses clés et renvoie les entiers en Number : on normalise ici. */
+    private PortainerStack toStack(Map<String, Object> raw) {
+        return new PortainerStack(
+                asInt(raw.get("Id")),
+                raw.get("Name") != null ? String.valueOf(raw.get("Name")) : null,
+                asInt(raw.get("EndpointId")),
+                Integer.valueOf(1).equals(asInt(raw.get("Status")))
+        );
+    }
+
+    private Integer asInt(Object value) {
+        return value instanceof Number number ? number.intValue() : null;
     }
 
     @Override
