@@ -43,7 +43,8 @@ public class UpdateGamingServerCommand implements Command {
                 .addOptions(new OptionData(OptionType.STRING, "admins", "liste des admins", true))
                 .addOptions(new OptionData(OptionType.STRING, "version", "version", false))
                 .addOptions(new OptionData(OptionType.STRING, "id", "id pour modifier identifier", false))
-                .addOptions(new OptionData(OptionType.STRING, "description", "description", false));
+                .addOptions(new OptionData(OptionType.STRING, "description", "description", false))
+                .addOptions(new OptionData(OptionType.STRING, "ports", "ports Freebox, ex: tcp:25565|udp:8211", false));
     }
 
     @Override
@@ -53,8 +54,15 @@ public class UpdateGamingServerCommand implements Command {
 
     @Override
     public String execute(CommandContext context) {
+        GamingServerEntity gsEntity;
         try {
-            GamingServerEntity gsEntity = gameServerParser.toServerEntity(context.getOptions());
+            gsEntity = gameServerParser.toServerEntity(context.getOptions());
+        } catch (IllegalArgumentException e) {
+            // porte le détail du champ fautif (ports mal formés notamment)
+            throw new CommandFailedException(e.getMessage());
+        }
+
+        try {
             gamingServerService.updateGamingServer(gsEntity);
         } catch (IllegalArgumentException e) {
             throw new CommandFailedException("Le serveur n'existe pas : " + e.getMessage());
