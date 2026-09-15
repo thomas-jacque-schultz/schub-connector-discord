@@ -27,6 +27,8 @@ public class DockerService {
     @Qualifier("portainerRequestService")
     private final ContainerRequestService containerRequestService;
 
+    private final PortForwardingService portForwardingService;
+
     /**
      * Fetch container status from Portainer and return true if the status changed.
      * Sets lastStatusCheckAt on every call.
@@ -77,11 +79,22 @@ public class DockerService {
         return state.isRunning() ? ServerStatusEnum.ONLINE : ServerStatusEnum.OFFLINE;
     }
 
+    /**
+     * Ouvre les redirections Freebox du serveur avant de lancer la stack : le jeu doit trouver
+     * son port déjà ouvert quand il finit de démarrer. Si l'ouverture échoue, le démarrage a quand
+     * même lieu — le serveur reste joignable en LAN et la réconciliation périodique rattrapera.
+     */
     public boolean startServer(GamingServerEntity gamingServerEntity) {
+        portForwardingService.reconcile(gamingServerEntity.getIdentifier(), true);
         return containerRequestService.startContainer(gamingServerEntity.getPortainerStackId());
     }
 
+    /** Referme les redirections après l'arrêt de la stack, et seulement si l'arrêt a réussi. */
     public boolean stopServer(GamingServerEntity gamingServerEntity) {
-        return containerRequestService.stopContainer(gamingServerEntity.getPortainerStackId());
+        boolean stopped = containerRequestService.stopContainer(gamingServerEntity.getPortainerStackId());
+        if (stopped) {
+            portForwardingService.reconcile(gamingServerEntity.getIdentifier(), false);
+        }
+        return stopped;
     }
 }

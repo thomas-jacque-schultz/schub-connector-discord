@@ -15,6 +15,8 @@ public record GamingServerDto(
         String version,
         String description,
         List<String> admins,
+        /** ports pilotés sur la Freebox ; absent d'un PUT = ports inchangés */
+        List<GamingServerPortDto> ports,
         /** null = never checked; UNKNOWN/ONLINE/OFFLINE/UNREACHABLE otherwise */
         String status,
         /** ISO-8601 timestamp of the last Portainer check, null if never checked */

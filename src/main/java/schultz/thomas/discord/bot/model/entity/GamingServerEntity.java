@@ -28,6 +28,9 @@ public  class GamingServerEntity {
    private String description;
    private List<String> admins = new ArrayList<>(); // evol to list of userEntity
 
+   /** ports à ouvrir sur la Freebox tant que ce serveur tourne ; vide = aucune redirection pilotée */
+   private List<GamingServerPort> ports = new ArrayList<>();
+
    /** null = never checked yet; drives the "force update on first poll" logic */
    private ServerStatusEnum status;
 

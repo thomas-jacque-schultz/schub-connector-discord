@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 
 @Component
@@ -23,7 +25,7 @@ public class InternalSecretFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(InternalSecretFilter.class);
     private static final String HEADER = "X-Internal-Secret";
 
-    @Value("${bot.internal-secret}")
+    @Value("${schub.internal-secret}")
     private String internalSecret;
 
     @Override
@@ -32,7 +34,7 @@ public class InternalSecretFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String provided = request.getHeader(HEADER);
 
-        if (internalSecret.equals(provided)) {
+        if (matches(provided)) {
             // Authentifie la requête comme venant du BFF
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     "bff-back", null, List.of(new SimpleGrantedAuthority("ROLE_INTERNAL"))
@@ -44,5 +46,19 @@ public class InternalSecretFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
+    }
+
+    /**
+     * Comparaison à temps constant : {@code equals} sort au premier octet différent, et la
+     * durée de réponse fuit alors la longueur du préfixe correct — de quoi reconstituer le
+     * secret octet par octet. Même comparaison que dans les connecteurs (plan §5).
+     */
+    private boolean matches(String provided) {
+        if (provided == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                provided.getBytes(StandardCharsets.UTF_8),
+                internalSecret.getBytes(StandardCharsets.UTF_8));
     }
 }
