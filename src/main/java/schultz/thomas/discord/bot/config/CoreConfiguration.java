@@ -9,19 +9,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
-/** Client HTTP vers le connecteur Portainer, portant le secret interne du maillage. */
 @RequiredArgsConstructor
 @Configuration
-@EnableConfigurationProperties(ConnectorPortainerProperties.class)
-public class ConnectorPortainerConfiguration {
+@EnableConfigurationProperties(CoreProperties.class)
+public class CoreConfiguration {
 
-    private final ConnectorPortainerProperties properties;
+    private final CoreProperties properties;
 
     @Value("${schub.internal-secret}")
     private String internalSecret;
 
-    @Bean("connectorPortainerRestClient")
-    public RestClient connectorPortainerRestClient() {
+    @Bean("coreRestClient")
+    public RestClient coreRestClient() {
         ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.DEFAULTS
                 .withConnectTimeout(properties.getConnectTimeout())
                 .withReadTimeout(properties.getReadTimeout());

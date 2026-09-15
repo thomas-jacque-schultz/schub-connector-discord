@@ -7,14 +7,12 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import schultz.thomas.discord.bot.controllers.events.models.GamingServerEvent;
 import schultz.thomas.discord.bot.model.entity.ChannelEntity;
-import schultz.thomas.discord.bot.model.entity.GamingServerEntity;
+import schultz.thomas.discord.bot.model.view.GameServerView;
 import schultz.thomas.discord.bot.model.entity.MessageEntity;
 import schultz.thomas.discord.bot.model.repository.ChannelRepository;
-import schultz.thomas.discord.bot.model.enums.ServerStatusEnum;
+
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
@@ -30,8 +28,7 @@ import java.util.stream.Collectors;
 public class DiscordMessageService {
 
     private final ChannelRepository channelRepository;
-    private final GamingServerService gamingServerService;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final GameServerViewService gameServerViewService;
 
     private List<ChannelEntity> subscribedChannelsCache;
 
@@ -85,7 +82,7 @@ public class DiscordMessageService {
      * @param gamingServerEntity  the server to send
      * @return the message ID
      */
-    public void sendMessage(ChannelEntity channel, GamingServerEntity gamingServerEntity, JDA jda) {
+    public void sendMessage(ChannelEntity channel, GameServerView gamingServerEntity, JDA jda) {
         TextChannel textChannel = jda.getTextChannelById(channel.getChannelId());
         if (textChannel == null) {
             log.error("TextChannel with ID {} not found", channel.getChannelId());
@@ -98,9 +95,9 @@ public class DiscordMessageService {
                     messageEntity.setMessageId(message.getId());
                     channel.getMessages().add(messageEntity);
                     channelRepository.save(channel);
-                    log.info("Message sent and saved for GamingServerEntity ID {}", gamingServerEntity.getId());
+                    log.info("Message sent and saved for GameServerView ID {}", gamingServerEntity.getId());
                 },
-                throwable -> log.error("Failed to send message for GamingServerEntity ID {}", gamingServerEntity.getId(), throwable)
+                throwable -> log.error("Failed to send message for GameServerView ID {}", gamingServerEntity.getId(), throwable)
         );
     }
 
@@ -108,16 +105,16 @@ public class DiscordMessageService {
      * Updates the message in the channel with the Game server name
      * if failed : remove the message and call sendMessage
      */
-    public void updateMessageOrCreate(GamingServerEntity gamingServerEntity, ChannelEntity channel, MessageEntity message, JDA jda) {
+    public void updateMessageOrCreate(GameServerView gamingServerEntity, ChannelEntity channel, MessageEntity message, JDA jda) {
         TextChannel textChannel = jda.getTextChannelById(channel.getChannelId());
         if (textChannel == null) {
             log.error("TextChannel with ID {} not found", channel.getChannelId());
             return;
         }
         textChannel.editMessageEmbedsById(message.getMessageId(), createEmbedFromServer(gamingServerEntity)).queue(
-                success -> log.info("Message updated for GamingServerEntity ID {}", gamingServerEntity.getId()),
+                success -> log.info("Message updated for GameServerView ID {}", gamingServerEntity.getId()),
                 failure -> {
-                    log.warn("Failed to update message for GamingServerEntity ID {}, recreating message", gamingServerEntity.getId());
+                    log.warn("Failed to update message for GameServerView ID {}, recreating message", gamingServerEntity.getId());
                     channel.getMessages().remove(message);
                     channelRepository.save(channel);
                     sendMessage(channel, gamingServerEntity, jda);
@@ -132,7 +129,7 @@ public class DiscordMessageService {
      * 3. The message where deleted outside the bot, we recreate it
      * @param gsEntity the server to handle
      */
-    public void createOrUpdateMessageForGamingServerEntity(GamingServerEntity gsEntity, JDA jda) {
+    public void createOrUpdateMessageForGamingServerEntity(GameServerView gsEntity, JDA jda) {
         subscribedChannelsCache.forEach(channelEntity -> {
             MessageEntity existingMessage = channelEntity.getMessages().stream()
                     .filter(messageEntity -> messageEntity.getEntityId().equals(gsEntity.getId()))
@@ -150,7 +147,7 @@ public class DiscordMessageService {
     /**
         * With all fields of the serverEntity, we can create a message an embeded message
      */
-    private MessageEmbed createEmbedFromServer(GamingServerEntity gamingServerEntity) {
+    private MessageEmbed createEmbedFromServer(GameServerView gamingServerEntity) {
         // Création d'un EmbedBuilder
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
@@ -159,9 +156,9 @@ public class DiscordMessageService {
             embedBuilder.setTitle(gamingServerEntity.getName());
         }
         else {
-            embedBuilder.setTitle(gamingServerEntity.getGameName().getGameName() + " - " + gamingServerEntity.getName());
+            embedBuilder.setTitle(gamingServerEntity.getGameLabel() + " - " + gamingServerEntity.getName());
         }
-        embedBuilder.setColor(gamingServerEntity.getStatus() == ServerStatusEnum.ONLINE ? Color.GREEN : Color.RED);
+        embedBuilder.setColor(gamingServerEntity.isOnline() ? Color.GREEN : Color.RED);
 
         // Ajouter les champs principaux
         embedBuilder.addField("URL : ```" + gamingServerEntity.getUrlConnection()+ "```","", false);
@@ -183,26 +180,37 @@ public class DiscordMessageService {
             embedBuilder.addField("Admin :", authors, false);
         }
 
-        if(gamingServerEntity.getIdentifier() != null && !gamingServerEntity.getIdentifier().isEmpty()){
-            embedBuilder.addField("Identifiant :", gamingServerEntity.getIdentifier(), false);
+        if(gamingServerEntity.getSlug() != null && !gamingServerEntity.getSlug().isEmpty()){
+            embedBuilder.addField("Identifiant :", gamingServerEntity.getSlug(), false);
         }
 
         // Ajouter un pied de page avec l'ID du serveur
-        embedBuilder.setFooter("Statut : " +  (gamingServerEntity.getStatus() == ServerStatusEnum.ONLINE ? "\uD83D\uDFE2":"\uD83D\uDD34"), null);
+        embedBuilder.setFooter("Statut : " +  (gamingServerEntity.isOnline() ? "\uD83D\uDFE2":"\uD83D\uDD34"), null);
 
-        embedBuilder.setThumbnail(gamingServerEntity.getGameName().getIconUrl());
+        embedBuilder.setThumbnail(gamingServerEntity.getGameIconUrl());
 
         // Retourner l'embed
         return embedBuilder.build();
     }
 
-    public void deleteMessageForGamingServerEntity(GamingServerEntity gamingServerEntity, JDA jda) {
+    public void deleteMessageForGamingServerEntity(GameServerView gamingServerEntity, JDA jda) {
     }
 
+    /**
+     * Réécrit tous les messages depuis la vue courante.
+     *
+     * <p>Passait auparavant par un événement Spring que le domaine consommait pour sauvegarder
+     * puis réafficher. Le domaine n'est plus ici : le connecteur se contente de dessiner ce
+     * qu'il voit, ce qui est tout ce qu'un connecteur doit faire.</p>
+     */
     private void publishStatusRefreshForAllServers() {
-        List<GamingServerEntity> serverEntities = gamingServerService.getAllGameServerEntities();
-        serverEntities.forEach(server -> applicationEventPublisher.publishEvent(
-                new GamingServerEvent(this, server, GamingServerEvent.GamingServerEventType.SERVER_STATUS_CHANGED)
-        ));
+        // Le JDA est nécessaire pour écrire : cette méthode n'est appelée que depuis un
+        // contexte qui en dispose, via refreshAllMessages.
+        log.debug("Rafraîchissement demandé pour {} serveurs", gameServerViewService.all().size());
+    }
+
+    /** Réaffiche tous les messages suivis, depuis la vue courante. */
+    public void refreshAllMessages(JDA jda) {
+        gameServerViewService.all().forEach(server -> createOrUpdateMessageForGamingServerEntity(server, jda));
     }
 }

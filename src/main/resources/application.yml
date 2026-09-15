@@ -1,13 +1,14 @@
 spring:
   config:
-    # Le second import charge les règles de ports permanentes depuis un fichier monté,
-    # éditable à la main sans reconstruire l'image (appliqué au redémarrage du bot).
-    import: "optional:configtree:/run/secrets/,optional:file:/etc/schub/port-forwarding.yml"
+    import: "optional:configtree:/run/secrets/"
   application:
-    name: mongodb
+    name: connector.discord
   data:
     mongodb:
+      # Le connecteur ne garde que ce qui lui est propre : salons suivis, messages postés,
+      # utilisateurs Discord. Le domaine vit dans le cœur depuis la phase 3.
       uri: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@${MONGO_HOST}:27017/${MONGO_DB}?authSource=admin
+
 discord:
   token: ${DISCORD_TOKEN}
   admin:
@@ -18,34 +19,23 @@ discord:
 schub:
   internal-secret: ${SCHUB_INTERNAL_SECRET:change-me-internal-secret}
 
-# Comment joindre le connecteur Freebox. Depuis la phase 1, ce service ne parle plus à la
-# box : il délègue à un connecteur qui, lui, détient le jeton d'appairage et l'API du
-# routeur. Changer de marque de routeur ne toucherait pas une ligne ici.
-connector:
-  freebox:
-    base-url: ${CONNECTOR_FREEBOX_URL:http://connector-freebox:8080}
-    connect-timeout: 3s
-    read-timeout: 8s
-  # Depuis la phase 2, ce service ne sonde plus Portainer : le connecteur le fait une fois
-  # par minute pour tout le monde et sert un cache daté. Le jeton d'API vit chez lui.
-  portainer:
-    base-url: ${CONNECTOR_PORTAINER_URL:http://connector-portainer:8080}
-    # Doit rester supérieur à la période de sonde du connecteur, sinon toute lecture
-    # serait déclarée périmée.
-    stale-after: ${CONNECTOR_PORTAINER_STALE_AFTER:5m}
-    connect-timeout: 3s
-    read-timeout: 10s
+# Le cœur détient le domaine. Ce connecteur ne fait que traduire des intentions Discord en
+# appels, et afficher ce que le cœur rapporte.
+core:
+  base-url: ${CORE_URL:http://schub-core:8080}
+  # « Push pour la latence, pull pour la correction » (plan §5) : le cœur pousse les
+  # changements, ce pull rattrape ceux qui se sont perdus. C'est lui qui rend inutile
+  # toute garantie de livraison — donc tout broker.
+  pull-interval: ${CORE_PULL_INTERVAL:1m}
+  connect-timeout: 3s
+  read-timeout: 10s
 
-# Politique d'ouverture des ports. Rien ici ne dépend de la marque du routeur.
-port-forwarding:
-  enabled: ${PORT_FORWARDING_ENABLED:false}
-  dry-run: ${PORT_FORWARDING_DRY_RUN:false}
-  # Nœud Swarm visé par défaut (loki, où les stacks de jeu sont contraintes).
-  default-lan-ip: ${PORT_FORWARDING_DEFAULT_LAN_IP:192.168.1.202}
-  # false : les règles devenues orphelines sont fermées et restent visibles sur le routeur.
-  prune-orphans: ${PORT_FORWARDING_PRUNE_ORPHANS:false}
-  # Garde-fou : jamais exposés sur Internet, même si une règle les demande.
-  forbidden-wan-ports: [22, 23, 139, 445, 3389, 5432, 27017, 9443]
-  # Les règles permanentes (port-forwarding.static-rules) ne sont volontairement PAS
-  # déclarées ici : elles vivent dans /etc/schub/port-forwarding.yml, monté depuis
-  # /mnt/volume/PortForwarding/. Les déclarer aux deux endroits risquerait d'écraser le fichier.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
