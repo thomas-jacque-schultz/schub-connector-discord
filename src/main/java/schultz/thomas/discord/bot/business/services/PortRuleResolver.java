@@ -23,7 +23,7 @@ import java.util.Optional;
  *
  * <p>Deux sources :</p>
  * <ul>
- *   <li>{@code port-forwarding.static-rules}, toujours ouvertes tant qu'elles sont déclarées ;</li>
+ *   <li>les règles permanentes, toujours ouvertes tant qu'elles sont déclarées ;</li>
  *   <li>les ports portés par chaque serveur, ouverts seulement pendant qu'il tourne.</li>
  * </ul>
  */
@@ -37,6 +37,13 @@ public class PortRuleResolver {
 
     private final PortForwardingProperties properties;
     private final GamingServerService gamingServerService;
+
+    /**
+     * Les règles permanentes viennent d'un fournisseur et non des propriétés : depuis qu'elles
+     * sont modifiables depuis l'interface, elles vivent en base. Ce détour garde ce resolver
+     * pur — il consomme une liste sans savoir d'où elle sort.
+     */
+    private final StaticPortRuleProvider staticPortRuleProvider;
 
     /**
      * @param overrideIdentifier serveur dont on force l'état au lieu de le déduire de son statut,
@@ -66,7 +73,7 @@ public class PortRuleResolver {
     private List<Candidate> candidates(String overrideIdentifier, boolean overrideOpen) {
         List<Candidate> candidates = new ArrayList<>();
 
-        for (PortForwardingProperties.StaticRule rule : properties.getStaticRules()) {
+        for (PortForwardingProperties.StaticRule rule : staticPortRuleProvider.staticRules()) {
             candidates.add(new Candidate(staticOwner(rule), rule.getProto(), rule.getWanPortStart(),
                     rule.getWanPortEnd(), rule.getLanIp(), rule.getLanPort(), rule.isEnabled()));
         }
