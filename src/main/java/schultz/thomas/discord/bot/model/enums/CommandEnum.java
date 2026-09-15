@@ -18,8 +18,9 @@ public enum CommandEnum {
     CREATE_USER("create-user"),
     UPDATE_USER("update-user"),
 
-    CREATE_GAMING_SERVER("create-gaming-server"),
-    UPDATE_GAMING_SERVER("update-gaming-server"),
+    // create-gaming-server et update-gaming-server ont été retirées (plan §4) : une fiche se
+    // rédige, elle ne se dicte pas dans un chat. Le formulaire du front est plus complet, et
+    // /create n'exposait même pas le déploiement à lier — un serveur créé ainsi était inutilisable.
 
     REFRESH_GAMING_SERVER_MESSAGE("refresh-status");
 
