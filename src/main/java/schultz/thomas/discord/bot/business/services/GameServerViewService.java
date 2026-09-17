@@ -7,6 +7,7 @@ import schultz.thomas.discord.bot.model.view.GameServerView;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * La vue que le connecteur a du domaine : une copie de travail, jamais une source de vérité.
@@ -22,16 +23,19 @@ public class GameServerViewService {
 
     private final CoreClient coreClient;
 
-    // Référence volatile vers une liste immuable : le champ n'est jamais muté, il est
-    // remplacé en bloc. C'est la publication sûre correcte, et le List.copyOf du refresh
-    // garantit l'immuabilité que ce raisonnement suppose — la liste rendue par le cœur
-    // est un ArrayList que all() laissait fuir tel quel.
-    private volatile List<GameServerView> view = List.of();
+    /**
+     * La vue n'est jamais mutée : elle est remplacée en bloc par une liste immuable.
+     * L'{@link AtomicReference} dit cela explicitement, là où un champ {@code volatile}
+     * laissait croire qu'on protégeait la liste elle-même. Le {@code List.copyOf} compte
+     * autant que l'échange atomique : le cœur rend un {@code ArrayList} que {@link #all()}
+     * laissait sinon fuir tel quel aux appelants.
+     */
+    private final AtomicReference<List<GameServerView>> view = new AtomicReference<>(List.of());
 
     /** Rend vrai si la lecture a abouti. */
     public boolean refresh() {
         try {
-            view = List.copyOf(coreClient.fetchAll());
+            view.set(List.copyOf(coreClient.fetchAll()));
             return true;
         } catch (RuntimeException e) {
             log.warn("Lecture du cœur impossible, la vue précédente est conservée : {}", e.getMessage());
@@ -40,10 +44,10 @@ public class GameServerViewService {
     }
 
     public List<GameServerView> all() {
-        return view;
+        return view.get();
     }
 
     public Optional<GameServerView> bySlug(String slug) {
-        return view.stream().filter(server -> slug.equals(server.getSlug())).findFirst();
+        return view.get().stream().filter(server -> slug.equals(server.getSlug())).findFirst();
     }
 }
