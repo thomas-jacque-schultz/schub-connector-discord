@@ -193,9 +193,6 @@ public class DiscordMessageService {
         return embedBuilder.build();
     }
 
-    public void deleteMessageForGamingServerEntity(GameServerView gamingServerEntity, JDA jda) {
-    }
-
     /**
      * Réécrit tous les messages depuis la vue courante.
      *

@@ -7,7 +7,10 @@ spring:
     mongodb:
       # Le connecteur ne garde que ce qui lui est propre : salons suivis, messages postés,
       # utilisateurs Discord. Le domaine vit dans le cœur depuis la phase 3.
-      uri: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@${MONGO_HOST}:27017/${MONGO_DB}?authSource=admin
+      #
+      # Utilisateur propre à sa base, créé par `task db:init`. Il détenait les identifiants
+      # root jusqu'au 17-09 : plus aucun service applicatif ne les a désormais.
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:27017/${MONGO_DB}?authSource=${MONGO_DB}
 
 discord:
   token: ${DISCORD_TOKEN}
