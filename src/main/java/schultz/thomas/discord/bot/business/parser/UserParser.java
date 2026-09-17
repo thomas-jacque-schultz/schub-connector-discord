@@ -2,8 +2,8 @@ package schultz.thomas.discord.bot.business.parser;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import schultz.thomas.discord.bot.model.entity.UserEntity;
-import schultz.thomas.discord.bot.model.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.entity.UserEntity;
+import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
 
 import java.util.Map;
 

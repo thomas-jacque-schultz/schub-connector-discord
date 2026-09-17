@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import schultz.thomas.discord.bot.model.view.GameServerView;
+import schultz.thomas.discord.bot.data.view.GameServerView;
 
 import java.util.List;
 

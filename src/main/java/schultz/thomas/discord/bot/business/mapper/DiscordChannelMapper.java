@@ -4,10 +4,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
-import schultz.thomas.discord.bot.controllers.dto.DiscordChannelDto;
-import schultz.thomas.discord.bot.controllers.dto.DiscordChannelSelection;
-import schultz.thomas.discord.bot.controllers.dto.DiscordGuildChannelsDto;
-import schultz.thomas.discord.bot.model.entity.ChannelEntity;
+import schultz.thomas.discord.bot.api.dto.DiscordChannelDto;
+import schultz.thomas.discord.bot.api.dto.DiscordChannelSelection;
+import schultz.thomas.discord.bot.api.dto.DiscordGuildChannelsDto;
+import schultz.thomas.discord.bot.data.entity.ChannelEntity;
 
 import java.util.ArrayList;
 import java.util.List;

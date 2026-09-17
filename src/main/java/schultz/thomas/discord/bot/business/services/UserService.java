@@ -1,7 +1,7 @@
 package schultz.thomas.discord.bot.business.services;
 
-import schultz.thomas.discord.bot.model.entity.UserEntity;
-import schultz.thomas.discord.bot.model.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.entity.UserEntity;
+import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
 
 public interface UserService {
 

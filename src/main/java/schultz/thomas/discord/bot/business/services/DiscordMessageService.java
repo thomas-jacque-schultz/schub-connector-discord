@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.springframework.stereotype.Service;
-import schultz.thomas.discord.bot.model.entity.ChannelEntity;
-import schultz.thomas.discord.bot.model.view.GameServerView;
-import schultz.thomas.discord.bot.model.entity.MessageEntity;
-import schultz.thomas.discord.bot.model.repository.ChannelRepository;
+import schultz.thomas.discord.bot.data.entity.ChannelEntity;
+import schultz.thomas.discord.bot.data.view.GameServerView;
+import schultz.thomas.discord.bot.data.entity.MessageEntity;
+import schultz.thomas.discord.bot.data.repository.ChannelRepository;
 
 
 import javax.persistence.EntityExistsException;

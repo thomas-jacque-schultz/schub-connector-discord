@@ -12,8 +12,8 @@ import schultz.thomas.discord.bot.business.command.CommandContext;
 import schultz.thomas.discord.bot.business.exceptions.CommandFailedException;
 import schultz.thomas.discord.bot.business.parser.UserParser;
 import schultz.thomas.discord.bot.business.services.UserService;
-import schultz.thomas.discord.bot.model.enums.CommandEnum;
-import schultz.thomas.discord.bot.model.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.enums.CommandEnum;
+import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
 
 import java.util.ArrayList;
 import java.util.List;

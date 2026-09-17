@@ -3,7 +3,7 @@ package schultz.thomas.discord.bot.business.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import schultz.thomas.discord.bot.model.view.GameServerView;
+import schultz.thomas.discord.bot.data.view.GameServerView;
 
 import java.util.List;
 import java.util.Optional;

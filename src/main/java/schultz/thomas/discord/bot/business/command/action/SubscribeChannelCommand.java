@@ -10,9 +10,9 @@ import schultz.thomas.discord.bot.business.command.CommandContext;
 import schultz.thomas.discord.bot.business.mapper.DiscordChannelMapper;
 import schultz.thomas.discord.bot.business.exceptions.CommandFailedException;
 import schultz.thomas.discord.bot.business.services.DiscordMessageService;
-import schultz.thomas.discord.bot.model.entity.ChannelEntity;
-import schultz.thomas.discord.bot.model.enums.CommandEnum;
-import schultz.thomas.discord.bot.model.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.entity.ChannelEntity;
+import schultz.thomas.discord.bot.data.enums.CommandEnum;
+import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
 
 import java.util.ArrayList;
 import java.util.List;

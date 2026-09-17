@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import schultz.thomas.discord.bot.controllers.events.schedullers.GameServerPullScheduler;
+import schultz.thomas.discord.bot.api.events.schedullers.GameServerPullScheduler;
 
 /** Programme le pull périodique à partir de {@code core.pull-interval}. */
 @Slf4j
