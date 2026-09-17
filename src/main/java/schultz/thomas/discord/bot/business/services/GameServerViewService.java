@@ -22,12 +22,16 @@ public class GameServerViewService {
 
     private final CoreClient coreClient;
 
+    // Référence volatile vers une liste immuable : le champ n'est jamais muté, il est
+    // remplacé en bloc. C'est la publication sûre correcte, et le List.copyOf du refresh
+    // garantit l'immuabilité que ce raisonnement suppose — la liste rendue par le cœur
+    // est un ArrayList que all() laissait fuir tel quel.
     private volatile List<GameServerView> view = List.of();
 
     /** Rend vrai si la lecture a abouti. */
     public boolean refresh() {
         try {
-            view = coreClient.fetchAll();
+            view = List.copyOf(coreClient.fetchAll());
             return true;
         } catch (RuntimeException e) {
             log.warn("Lecture du cœur impossible, la vue précédente est conservée : {}", e.getMessage());
