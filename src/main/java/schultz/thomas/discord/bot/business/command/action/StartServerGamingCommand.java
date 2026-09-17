@@ -61,9 +61,10 @@ public class StartServerGamingCommand implements Command {
             log.warn("Démarrage refusé par le cœur pour '{}' : {}", slug, e.getMessage());
             throw new CommandFailedException("Impossible de lancer le serveur de jeu");
         }
-        // Volontairement pas de « serveur lancé » : le cœur a accepté la demande, la stack met
-        // des dizaines de secondes à répondre, et c'est la boucle d'observation qui constatera
-        // le démarrage puis rafraîchira le message.
-        return "Démarrage demandé. Le message se mettra à jour dès que le serveur répondra.";
+        // Volontairement pas de « serveur lancé » : le cœur a seulement ACCEPTÉ la demande, la
+        // stack met des dizaines de secondes à basculer, et c'est la boucle d'observation qui
+        // constatera le démarrage. Ne rien promettre non plus sur ce message-ci : c'est la carte
+        // d'état du salon abonné qui se rafraîchit, pas cette réponse-là.
+        return "Commande reçue et transmise.";
     }
 }
