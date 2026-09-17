@@ -53,6 +53,8 @@ public class StopServerGamingCommand implements Command {
             log.warn("Arrêt refusé par le cœur pour '{}' : {}", slug, e.getMessage());
             throw new CommandFailedException("Impossible d'arrêter le serveur de jeu");
         }
-        return "Arrêt demandé. Le message se mettra à jour dès que le serveur se sera éteint.";
+        // Voir StartServerGamingCommand : le cœur a accepté, rien n'est encore constaté, et
+        // cette réponse-ci ne se met pas à jour.
+        return "Commande reçue et transmise.";
     }
 }
