@@ -1,7 +1,7 @@
 package schultz.thomas.discord.bot.business.mapper;
 
 import org.mapstruct.*;
-import schultz.thomas.discord.bot.model.entity.UserEntity;
+import schultz.thomas.discord.bot.data.entity.UserEntity;
 
 @Mapper(componentModel = "spring", collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
 public interface UserEntityMapper {

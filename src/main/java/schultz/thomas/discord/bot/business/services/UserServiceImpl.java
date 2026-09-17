@@ -4,9 +4,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import schultz.thomas.discord.bot.business.mapper.UserEntityMapper;
-import schultz.thomas.discord.bot.model.entity.UserEntity;
-import schultz.thomas.discord.bot.model.enums.UserPrivilegeEnum;
-import schultz.thomas.discord.bot.model.repository.UserRepository;
+import schultz.thomas.discord.bot.data.entity.UserEntity;
+import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
