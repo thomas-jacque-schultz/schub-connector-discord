@@ -6,9 +6,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.springframework.stereotype.Service;
-import schultz.thomas.discord.bot.business.services.UserService;
+import schultz.thomas.discord.bot.business.services.CoreClient;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +25,12 @@ import java.util.stream.Collectors;
  * réception immédiatement et transforme l'interaction en « réfléchit… ». La vraie réponse part
  * ensuite par le webhook, sans limite de temps. C'est la réponse prévue au §5 du plan ;
  * l'architecture n'a pas à s'en mêler.</p>
+ *
+ * <p><strong>Ce service ne juge plus des droits, il pose la question au cœur.</strong> Avant le
+ * 18-09 il comparait un {@code UserPrivilegeEnum} local à une liste de rôles par commande —
+ * pendant que le front appliquait une règle différente sur les mêmes actions. Deux règles pour
+ * un même système, c'est une règle de trop : c'est le cœur qui décide, et lui seul sait qu'une
+ * personne figure dans les {@code admins} d'un serveur.</p>
  */
 @Slf4j
 @Service
@@ -32,7 +39,7 @@ public class CommandExecutorService {
 
     private final CommandSelector commandSelector;
 
-    private final UserService userService;
+    private final CoreClient coreClient;
 
     public void handleCommand(SlashCommandInteractionEvent discordContext) {
         // Premier geste, avant toute lecture en base ou appel HTTP : le compte à rebours court déjà.
@@ -40,8 +47,10 @@ public class CommandExecutorService {
 
         Map<String, String> options = discordContext.getOptions().stream()
                 .collect(Collectors.toMap(OptionMapping::getName, OptionMapping::getAsString));
-        options.put("user-id", discordContext.getUser().getId());
-        options.put("user-name", discordContext.getUser().getName());
+        String actorId = discordContext.getUser().getId();
+        String actorName = discordContext.getUser().getName();
+        options.put("user-id", actorId);
+        options.put("user-name", actorName);
         options.put("channel-id", discordContext.getChannel().getId());
         options.put("channel-name", discordContext.getChannel().getName());
         options.put("guild-id", discordContext.getGuild().getId());
@@ -60,9 +69,8 @@ public class CommandExecutorService {
             return;
         }
 
-        if (!command.hasRight(userService.getRole(discordContext.getUser().getId()))) {
+        if (!isAllowed(command, context, actorId, actorName)) {
             respond(discordContext, "The emperor of Holy Terra didn't allow you to : " + commandName);
-            log.warn("Commande '{}' refusée à l'utilisateur {}", commandName, discordContext.getUser().getId());
             return;
         }
 
@@ -73,6 +81,30 @@ public class CommandExecutorService {
             // pour toujours : l'utilisateur n'apprend jamais que ça s'est mal passé.
             log.error("Échec de la commande '{}' : {}", commandName, e.getMessage(), e);
             respond(discordContext, e.getMessage() != null ? e.getMessage() : "La commande a échoué.");
+        }
+    }
+
+    /**
+     * Le cœur répond, le connecteur applique.
+     *
+     * <p>Si le cœur est injoignable, on refuse. C'est le seul sens acceptable : exécuter faute
+     * de réponse ferait d'une panne du cœur un contournement de l'autorisation, et c'est
+     * précisément la porte qu'on vient de fermer.</p>
+     */
+    private boolean isAllowed(Command command, CommandContext context, String actorId, String actorName) {
+        try {
+            Set<String> effective = coreClient.effectivePermissions(
+                    actorId, actorName, command.scopedServerSlug(context));
+            if (effective.contains(command.permissionNeeded().name())) {
+                return true;
+            }
+            log.warn("Commande '{}' refusée à {} : {} manquante",
+                    context.getCommandName(), actorId, command.permissionNeeded());
+            return false;
+        } catch (RuntimeException e) {
+            log.error("Autorisation indisponible pour '{}' — commande refusée : {}",
+                    context.getCommandName(), e.getMessage());
+            return false;
         }
     }
 

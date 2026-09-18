@@ -13,10 +13,8 @@ import schultz.thomas.discord.bot.business.exceptions.CommandFailedException;
 import schultz.thomas.discord.bot.business.services.CoreClient;
 import schultz.thomas.discord.bot.business.services.GameServerViewService;
 import schultz.thomas.discord.bot.data.enums.CommandEnum;
-import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Demande au cœur de démarrer un serveur.
@@ -35,8 +33,20 @@ public class StartServerGamingCommand implements Command {
     private final CoreClient coreClient;
     private final GameServerViewService gameServerViewService;
 
-    public List<UserPrivilegeEnum> roleNeeded() {
-        return new ArrayList<>(List.of(UserPrivilegeEnum.ADMINISTRATOR, UserPrivilegeEnum.OWNER));
+    @Override
+    public PermissionEnum permissionNeeded() {
+        return PermissionEnum.SERVER_START;
+    }
+
+    /**
+     * La commande vise un serveur précis, donc la portée compte : quelqu'un qui figure dans les
+     * {@code admins} de ce serveur peut le démarrer sans que son rôle porte {@code SERVER_START}
+     * (décision n°11). Avant le 18-09, Discord exigeait ADMINISTRATOR et le refusait — c'est
+     * exactement la divergence entre Discord et le front qu'on supprime.
+     */
+    @Override
+    public String scopedServerSlug(CommandContext context) {
+        return context.getOptions().get("identifier");
     }
 
     @Override
@@ -56,7 +66,7 @@ public class StartServerGamingCommand implements Command {
         gameServerViewService.bySlug(slug)
                 .orElseThrow(() -> new CommandFailedException("Le serveur de jeu n'existe pas"));
         try {
-            coreClient.start(slug);
+            coreClient.start(slug, context.getOptions().get("user-id"));
         } catch (RuntimeException e) {
             log.warn("Démarrage refusé par le cœur pour '{}' : {}", slug, e.getMessage());
             throw new CommandFailedException("Impossible de lancer le serveur de jeu");
