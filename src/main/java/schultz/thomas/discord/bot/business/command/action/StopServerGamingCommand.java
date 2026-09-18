@@ -13,10 +13,8 @@ import schultz.thomas.discord.bot.business.exceptions.CommandFailedException;
 import schultz.thomas.discord.bot.business.services.CoreClient;
 import schultz.thomas.discord.bot.business.services.GameServerViewService;
 import schultz.thomas.discord.bot.data.enums.CommandEnum;
-import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /** Demande au cœur d'arrêter un serveur. Le connecteur n'arrête rien lui-même. */
 @Slf4j
@@ -27,8 +25,15 @@ public class StopServerGamingCommand implements Command {
     private final CoreClient coreClient;
     private final GameServerViewService gameServerViewService;
 
-    public List<UserPrivilegeEnum> roleNeeded() {
-        return new ArrayList<>(List.of(UserPrivilegeEnum.ADMINISTRATOR, UserPrivilegeEnum.OWNER));
+    @Override
+    public PermissionEnum permissionNeeded() {
+        return PermissionEnum.SERVER_STOP;
+    }
+
+    /** Même portée que le démarrage : un administrateur de CE serveur peut l.arrêter. */
+    @Override
+    public String scopedServerSlug(CommandContext context) {
+        return context.getOptions().get("identifier");
     }
 
     @Override
@@ -48,7 +53,7 @@ public class StopServerGamingCommand implements Command {
         gameServerViewService.bySlug(slug)
                 .orElseThrow(() -> new CommandFailedException("Le serveur de jeu n'existe pas"));
         try {
-            coreClient.stop(slug);
+            coreClient.stop(slug, context.getOptions().get("user-id"));
         } catch (RuntimeException e) {
             log.warn("Arrêt refusé par le cœur pour '{}' : {}", slug, e.getMessage());
             throw new CommandFailedException("Impossible d'arrêter le serveur de jeu");

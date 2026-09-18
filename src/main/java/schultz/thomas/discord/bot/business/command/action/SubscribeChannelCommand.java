@@ -12,10 +12,8 @@ import schultz.thomas.discord.bot.business.exceptions.CommandFailedException;
 import schultz.thomas.discord.bot.business.services.DiscordMessageService;
 import schultz.thomas.discord.bot.data.entity.ChannelEntity;
 import schultz.thomas.discord.bot.data.enums.CommandEnum;
-import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -25,8 +23,9 @@ public class SubscribeChannelCommand implements Command {
     private final DiscordChannelMapper discordChannelMapper;
 
 
-    public List<UserPrivilegeEnum> roleNeeded(){
-        return new ArrayList<>( List.of(UserPrivilegeEnum.OWNER));
+    @Override
+    public PermissionEnum permissionNeeded() {
+        return PermissionEnum.DISCORD_CHANNEL_MANAGE;
     }
 
     @Override

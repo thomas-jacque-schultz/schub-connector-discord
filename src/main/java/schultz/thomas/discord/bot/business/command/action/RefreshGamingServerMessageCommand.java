@@ -14,10 +14,8 @@ import schultz.thomas.discord.bot.business.exceptions.CommandFailedException;
 import schultz.thomas.discord.bot.business.services.DiscordMessageService;
 import schultz.thomas.discord.bot.business.services.GameServerViewService;
 import schultz.thomas.discord.bot.data.enums.CommandEnum;
-import schultz.thomas.discord.bot.data.enums.UserPrivilegeEnum;
+import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Retire la vue du cœur et réaffiche le message.
@@ -39,8 +37,15 @@ public class RefreshGamingServerMessageCommand implements Command {
      */
     private final ObjectProvider<JDA> jdaProvider;
 
-    public List<UserPrivilegeEnum> roleNeeded() {
-        return new ArrayList<>(List.of(UserPrivilegeEnum.ADMINISTRATOR, UserPrivilegeEnum.OWNER));
+    /**
+     * DISCORD_CHANNEL_MANAGE et non SERVER_VIEW : la commande ne se contente pas de lire, elle
+     * réécrit le message d.état dans un salon abonné. C.est une action sur le salon, et c.est la
+     * permission qui gouverne les salons — elle garde au passage la commande au niveau
+     * ADMINISTRATOR, qui était le sien avant le 18-09.
+     */
+    @Override
+    public PermissionEnum permissionNeeded() {
+        return PermissionEnum.DISCORD_CHANNEL_MANAGE;
     }
 
     @Override
