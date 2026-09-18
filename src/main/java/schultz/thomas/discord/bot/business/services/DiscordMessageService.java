@@ -19,7 +19,6 @@ import javax.persistence.EntityNotFoundException;
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -174,11 +173,11 @@ public class DiscordMessageService {
             embedBuilder.setDescription(gamingServerEntity.getDescription());
         }
 
-        // Ajouter les auteurs autorisés si la liste n'est pas vide
-        if (gamingServerEntity.getAdmins() != null && !gamingServerEntity.getAdmins().isEmpty()) {
-            String authors = gamingServerEntity.getAdmins().stream().collect(Collectors.joining(", "));
-            embedBuilder.addField("Admin :", authors, false);
-        }
+        // La liste des administrateurs ne s'affiche plus ici (18-09). Elle est passée derrière
+        // SERVER_INFRA_VIEW, et le connecteur tire la projection « membre » : il ne la reçoit
+        // plus. Ce n'est pas une perte par accident — cette carte est lisible par tout le salon,
+        // et le nom des administrateurs fait partie de ce qu'on a décidé de ne pas exposer à qui
+        // n'a pas de raison de le voir (décision n°10).
 
         if(gamingServerEntity.getSlug() != null && !gamingServerEntity.getSlug().isEmpty()){
             embedBuilder.addField("Identifiant :", gamingServerEntity.getSlug(), false);

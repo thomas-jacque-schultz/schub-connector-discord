@@ -2,8 +2,6 @@ package schultz.thomas.discord.bot.data.view;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * Un GameServer tel que le cœur le rapporte, réduit à ce qu'un message Discord affiche.
  *
@@ -11,6 +9,11 @@ import java.util.List;
  * détient aucune projection du domaine, il tire périodiquement (plan §5). Le libellé et l'icône
  * du jeu viennent du cœur plutôt que d'une énumération locale — le connecteur n'a pas à
  * connaître le catalogue des jeux.</p>
+ *
+ * <p>Plus de liste d'administrateurs depuis le 18-09 : elle est passée derrière
+ * {@code SERVER_INFRA_VIEW}, et le pull du connecteur se fait sans acteur — il reçoit donc la
+ * projection « membre », qui ne la porte pas. Un salon Discord n'est pas un endroit où publier
+ * qui administre quoi (décision n°10).</p>
  */
 @Data
 public class GameServerView {
@@ -25,7 +28,6 @@ public class GameServerView {
     private String installation;
     private String version;
     private String description;
-    private List<String> admins;
     /** ONLINE / OFFLINE / UNREACHABLE / UNKNOWN, ou null si jamais observé. */
     private String status;
 
