@@ -15,12 +15,13 @@ public enum CommandEnum {
     START_SGAMING("start"),                              // start sGaming server
     STOP_SGAMING("pause"),                               // stop sGaming server
 
-    CREATE_USER("create-user"),
-    UPDATE_USER("update-user"),
-
     // create-gaming-server et update-gaming-server ont été retirées (plan §4) : une fiche se
     // rédige, elle ne se dicte pas dans un chat. Le formulaire du front est plus complet, et
     // /create n'exposait même pas le déploiement à lier — un serveur créé ainsi était inutilisable.
+
+    // create-user et update-user ont été retirées le 18-09 : le connecteur ne détient plus
+    // d'utilisateurs. Attribuer un rôle depuis un chat contournerait la règle qui interdit
+    // d'attribuer un rôle plus puissant que le sien, laquelle vit dans le cœur (plan §A.1).
 
     REFRESH_GAMING_SERVER_MESSAGE("refresh-status");
 
