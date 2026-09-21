@@ -30,12 +30,6 @@ public class StopServerGamingCommand implements Command {
         return PermissionEnum.SERVER_STOP;
     }
 
-    /** Même portée que le démarrage : un administrateur de CE serveur peut l.arrêter. */
-    @Override
-    public String scopedServerSlug(CommandContext context) {
-        return context.getOptions().get("identifier");
-    }
-
     @Override
     public CommandData getCommandData() {
         return new CommandDataImpl("pause", "arrête le serveur de jeu")

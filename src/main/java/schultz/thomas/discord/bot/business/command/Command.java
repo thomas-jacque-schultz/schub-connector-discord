@@ -15,24 +15,8 @@ import schultz.thomas.discord.bot.data.enums.PermissionEnum;
  */
 public interface Command {
 
-    /**
-     * La permission que le cœur devra reconnaître à l'auteur pour que la commande s'exécute.
-     *
-     * @see #scopedServerSlug(CommandContext)
-     */
+    /** La permission que le cœur devra reconnaître à l'auteur pour que la commande s'exécute. */
     PermissionEnum permissionNeeded();
-
-    /**
-     * Le serveur sur lequel porte la commande, quand elle en vise un — sinon {@code null}.
-     *
-     * <p>C'est ce qui permet au cœur de répondre « oui » à quelqu'un qui n'a pas
-     * {@code SERVER_START} dans son rôle mais figure dans les {@code admins} de <em>ce</em>
-     * serveur (décision n°11). Sans cette information, la portée disparaîtrait et Discord
-     * redeviendrait plus strict que le front — le défaut qu'on est en train de corriger.</p>
-     */
-    default String scopedServerSlug(CommandContext context) {
-        return null;
-    }
 
     /**
      * interaction configuration in discord client

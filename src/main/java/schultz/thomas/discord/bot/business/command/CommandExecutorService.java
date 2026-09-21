@@ -93,8 +93,7 @@ public class CommandExecutorService {
      */
     private boolean isAllowed(Command command, CommandContext context, String actorId, String actorName) {
         try {
-            Set<String> effective = coreClient.effectivePermissions(
-                    actorId, actorName, command.scopedServerSlug(context));
+            Set<String> effective = coreClient.effectivePermissions(actorId, actorName);
             if (effective.contains(command.permissionNeeded().name())) {
                 return true;
             }

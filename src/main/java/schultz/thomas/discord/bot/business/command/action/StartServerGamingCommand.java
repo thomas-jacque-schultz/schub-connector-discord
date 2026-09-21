@@ -38,17 +38,6 @@ public class StartServerGamingCommand implements Command {
         return PermissionEnum.SERVER_START;
     }
 
-    /**
-     * La commande vise un serveur précis, donc la portée compte : quelqu'un qui figure dans les
-     * {@code admins} de ce serveur peut le démarrer sans que son rôle porte {@code SERVER_START}
-     * (décision n°11). Avant le 18-09, Discord exigeait ADMINISTRATOR et le refusait — c'est
-     * exactement la divergence entre Discord et le front qu'on supprime.
-     */
-    @Override
-    public String scopedServerSlug(CommandContext context) {
-        return context.getOptions().get("identifier");
-    }
-
     @Override
     public CommandData getCommandData() {
         return new CommandDataImpl("start", "lance le serveur de jeu")
