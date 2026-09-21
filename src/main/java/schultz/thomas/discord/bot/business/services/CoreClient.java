@@ -46,31 +46,24 @@ public class CoreClient {
     }
 
     /**
-     * « Que peut faire cette personne, ici ? » — la question posée au cœur avant chaque commande.
+     * « Que peut faire cette personne ? » — la question posée au cœur avant chaque commande.
      *
      * <p>Le compte est créé au rôle {@code VISITEUR} s'il est inconnu : quelqu'un qui tape une
      * commande dans Discord est quelqu'un du système, même s'il ne s'est jamais connecté au site.</p>
-     *
-     * <p>{@code gameServerSlug} porte la <em>portée</em>. Sans lui, la réponse ne contiendrait
-     * que les permissions du rôle, et un administrateur de serveur se verrait refuser le
-     * démarrage du sien.</p>
      */
-    public Set<String> effectivePermissions(String discordId, String discordUsername, String gameServerSlug) {
+    public Set<String> effectivePermissions(String discordId, String discordUsername) {
         Set<String> permissions = restClient.get()
-                .uri(uri -> permissionsUri(uri, discordId, discordUsername, gameServerSlug))
+                .uri(uri -> permissionsUri(uri, discordId, discordUsername))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
         return permissions == null ? Set.of() : permissions;
     }
 
-    private java.net.URI permissionsUri(UriBuilder uri, String discordId, String discordUsername, String slug) {
+    private java.net.URI permissionsUri(UriBuilder uri, String discordId, String discordUsername) {
         uri.path("/users/by-discord/{discordId}/permissions");
         if (discordUsername != null && !discordUsername.isBlank()) {
             uri.queryParam("discordUsername", discordUsername);
-        }
-        if (slug != null && !slug.isBlank()) {
-            uri.queryParam("gameServer", slug);
         }
         return uri.build(discordId);
     }
