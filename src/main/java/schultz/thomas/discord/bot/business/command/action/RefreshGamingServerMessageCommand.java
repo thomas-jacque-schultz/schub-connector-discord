@@ -17,32 +17,15 @@ import schultz.thomas.discord.bot.data.enums.CommandEnum;
 import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
 
-/**
- * Retire la vue du cœur et réaffiche le message.
- *
- * <p>Ne sonde plus rien : l'observation appartient au cœur. Cette commande ne fait que forcer
- * le pull que le connecteur aurait fait de lui-même à la minute suivante — utile quand on veut
- * voir tout de suite, sans attendre.</p>
- */
 @RequiredArgsConstructor
 @Component
 public class RefreshGamingServerMessageCommand implements Command {
 
     private final GameServerViewService gameServerViewService;
     private final DiscordMessageService discordMessageService;
-    /**
-     * Résolu à l'usage et non à la construction : JDA dépend des écouteurs, qui dépendent du
-     * sélecteur, qui dépend des commandes. L'injecter directement ici refermerait le cycle et
-     * empêcherait le contexte Spring de démarrer.
-     */
+    // ObjectProvider : injecter JDA directement ferme un cycle de beans (JDA → écouteurs → commandes).
     private final ObjectProvider<JDA> jdaProvider;
 
-    /**
-     * DISCORD_CHANNEL_MANAGE et non SERVER_VIEW : la commande ne se contente pas de lire, elle
-     * réécrit le message d.état dans un salon abonné. C.est une action sur le salon, et c.est la
-     * permission qui gouverne les salons — elle garde au passage la commande au niveau
-     * ADMINISTRATOR, qui était le sien avant le 18-09.
-     */
     @Override
     public PermissionEnum permissionNeeded() {
         return PermissionEnum.DISCORD_CHANNEL_MANAGE;

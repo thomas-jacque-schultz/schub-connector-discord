@@ -16,15 +16,6 @@ import schultz.thomas.discord.bot.data.enums.CommandEnum;
 import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
 
-/**
- * Demande au cœur de démarrer un serveur.
- *
- * <p>Le connecteur ne démarre rien lui-même et ne connaît ni la stack ni les ports : il traduit
- * une intention Discord en appel au cœur, entièrement, et s'arrête là (plan §4).</p>
- *
- * <p>L'option garde le nom {@code identifier}, connu des utilisateurs. Le §2 renomme le code,
- * pas l'ergonomie d'une commande déjà dans les habitudes.</p>
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -60,10 +51,6 @@ public class StartServerGamingCommand implements Command {
             log.warn("Démarrage refusé par le cœur pour '{}' : {}", slug, e.getMessage());
             throw new CommandFailedException("Impossible de lancer le serveur de jeu");
         }
-        // Volontairement pas de « serveur lancé » : le cœur a seulement ACCEPTÉ la demande, la
-        // stack met des dizaines de secondes à basculer, et c'est la boucle d'observation qui
-        // constatera le démarrage. Ne rien promettre non plus sur ce message-ci : c'est la carte
-        // d'état du salon abonné qui se rafraîchit, pas cette réponse-là.
         return "Commande reçue et transmise.";
     }
 }

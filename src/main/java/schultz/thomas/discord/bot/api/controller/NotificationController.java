@@ -13,13 +13,6 @@ import schultz.thomas.discord.bot.business.services.GameServerViewService;
 
 import java.util.Map;
 
-/**
- * Ce que le cœur pousse quand un serveur change.
- *
- * <p>Sert la latence : le message Discord bouge tout de suite au lieu d'attendre le pull.
- * Répond systématiquement 202 — un push perdu ou refusé est sans conséquence, le pull suivant
- * resynchronise. Faire échouer l'appel ferait échouer une écriture pourtant réussie côté cœur.</p>
- */
 @Slf4j
 @RestController
 @RequestMapping("/notifications")

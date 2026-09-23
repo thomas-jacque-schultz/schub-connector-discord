@@ -5,31 +5,16 @@ spring:
     name: connector.discord
   data:
     mongodb:
-      # Le connecteur ne garde que ce qui lui est propre : salons suivis et messages postés.
-      # Le domaine vit dans le cœur depuis la phase 3, et l'identité depuis le 18-09 : la
-      # collection `users` de cette base n'est plus ni lue ni écrite.
-      #
-      # Utilisateur propre à sa base, créé par `task db:init`. Il détenait les identifiants
-      # root jusqu'au 17-09 : plus aucun service applicatif ne les a désormais.
       uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:27017/${MONGO_DB}?authSource=${MONGO_DB}
 
-# Le connecteur ne connaît plus que Discord : salons, messages, guildes. DISCORD_ADMIN_ID et
-# DISCORD_ADMIN_USERNAME ont suivi l'identité dans le cœur le 18-09 — rien ici ne les lisait
-# plus, et une variable obligatoire que personne ne lit est un piège de déploiement.
 discord:
   token: ${DISCORD_TOKEN}
 
-# Secret partagé par tous les services Schub.
 schub:
   internal-secret: ${SCHUB_INTERNAL_SECRET:change-me-internal-secret}
 
-# Le cœur détient le domaine. Ce connecteur ne fait que traduire des intentions Discord en
-# appels, et afficher ce que le cœur rapporte.
 core:
   base-url: ${CORE_URL:http://schub-core:8080}
-  # « Push pour la latence, pull pour la correction » (plan §5) : le cœur pousse les
-  # changements, ce pull rattrape ceux qui se sont perdus. C'est lui qui rend inutile
-  # toute garantie de livraison — donc tout broker.
   pull-interval: ${CORE_PULL_INTERVAL:1m}
   connect-timeout: 3s
   read-timeout: 10s

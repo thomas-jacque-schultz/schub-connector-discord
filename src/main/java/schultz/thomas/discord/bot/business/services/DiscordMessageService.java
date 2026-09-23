@@ -53,7 +53,6 @@ public class DiscordMessageService {
         try {
             subscribeDiscordChannel(channelEntity);
         } catch (EntityExistsException ignored) {
-            // Idempotent for API and UI retries.
         }
 
         publishStatusRefreshForAllServers();
@@ -74,13 +73,6 @@ public class DiscordMessageService {
         return true;
     }
 
-    /**
-        * Sends a message to the channel with the Game server name
-        * if successful return save the message ID
-     * @param channel  the channel to send the message
-     * @param gamingServerEntity  the server to send
-     * @return the message ID
-     */
     public void sendMessage(ChannelEntity channel, GameServerView gamingServerEntity, JDA jda) {
         TextChannel textChannel = jda.getTextChannelById(channel.getChannelId());
         if (textChannel == null) {
@@ -100,10 +92,6 @@ public class DiscordMessageService {
         );
     }
 
-    /**
-     * Updates the message in the channel with the Game server name
-     * if failed : remove the message and call sendMessage
-     */
     public void updateMessageOrCreate(GameServerView gamingServerEntity, ChannelEntity channel, MessageEntity message, JDA jda) {
         TextChannel textChannel = jda.getTextChannelById(channel.getChannelId());
         if (textChannel == null) {
@@ -121,13 +109,6 @@ public class DiscordMessageService {
         );
     }
 
-    /**
-     * Handle the three situations
-     * 1. The message doesn't exist, we create it
-     * 2. The message exists we update it
-     * 3. The message where deleted outside the bot, we recreate it
-     * @param gsEntity the server to handle
-     */
     public void createOrUpdateMessageForGamingServerEntity(GameServerView gsEntity, JDA jda) {
         subscribedChannelsCache.forEach(channelEntity -> {
             MessageEntity existingMessage = channelEntity.getMessages().stream()
@@ -143,14 +124,9 @@ public class DiscordMessageService {
         });
     }
 
-    /**
-        * With all fields of the serverEntity, we can create a message an embeded message
-     */
     private MessageEmbed createEmbedFromServer(GameServerView gamingServerEntity) {
-        // Création d'un EmbedBuilder
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
-        // Définir le titre comme le nom du serveur
         if(gamingServerEntity.getName() == null || gamingServerEntity.getName().isEmpty()){
             embedBuilder.setTitle(gamingServerEntity.getName());
         }
@@ -159,7 +135,6 @@ public class DiscordMessageService {
         }
         embedBuilder.setColor(gamingServerEntity.isOnline() ? Color.GREEN : Color.RED);
 
-        // Ajouter les champs principaux
         embedBuilder.addField("URL : ```" + gamingServerEntity.getUrlConnection()+ "```","", false);
         embedBuilder.addField("Nombre de joueurs max", String.valueOf(gamingServerEntity.getPlayersMax()), true);
         embedBuilder.addField("Version", Objects.requireNonNullElse(gamingServerEntity.getVersion(),""), true);
@@ -168,44 +143,25 @@ public class DiscordMessageService {
             embedBuilder.addField("Installation :", gamingServerEntity.getInstallation(), false);
         }
 
-        // Ajouter une description si elle existe
         if (gamingServerEntity.getDescription() != null && !gamingServerEntity.getDescription().isEmpty()) {
             embedBuilder.setDescription(gamingServerEntity.getDescription());
         }
-
-        // La liste des administrateurs ne s'affiche plus ici (18-09). Elle est passée derrière
-        // SERVER_INFRA_VIEW, et le connecteur tire la projection « membre » : il ne la reçoit
-        // plus. Ce n'est pas une perte par accident — cette carte est lisible par tout le salon,
-        // et le nom des administrateurs fait partie de ce qu'on a décidé de ne pas exposer à qui
-        // n'a pas de raison de le voir (décision n°10).
 
         if(gamingServerEntity.getSlug() != null && !gamingServerEntity.getSlug().isEmpty()){
             embedBuilder.addField("Identifiant :", gamingServerEntity.getSlug(), false);
         }
 
-        // Ajouter un pied de page avec l'ID du serveur
         embedBuilder.setFooter("Statut : " +  (gamingServerEntity.isOnline() ? "\uD83D\uDFE2":"\uD83D\uDD34"), null);
 
         embedBuilder.setThumbnail(gamingServerEntity.getGameIconUrl());
 
-        // Retourner l'embed
         return embedBuilder.build();
     }
 
-    /**
-     * Réécrit tous les messages depuis la vue courante.
-     *
-     * <p>Passait auparavant par un événement Spring que le domaine consommait pour sauvegarder
-     * puis réafficher. Le domaine n'est plus ici : le connecteur se contente de dessiner ce
-     * qu'il voit, ce qui est tout ce qu'un connecteur doit faire.</p>
-     */
     private void publishStatusRefreshForAllServers() {
-        // Le JDA est nécessaire pour écrire : cette méthode n'est appelée que depuis un
-        // contexte qui en dispose, via refreshAllMessages.
         log.debug("Rafraîchissement demandé pour {} serveurs", gameServerViewService.all().size());
     }
 
-    /** Réaffiche tous les messages suivis, depuis la vue courante. */
     public void refreshAllMessages(JDA jda) {
         gameServerViewService.all().forEach(server -> createOrUpdateMessageForGamingServerEntity(server, jda));
     }
