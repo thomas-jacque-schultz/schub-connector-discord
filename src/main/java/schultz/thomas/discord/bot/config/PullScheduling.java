@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import schultz.thomas.discord.bot.api.events.schedullers.GameServerPullScheduler;
 
-/** Programme le pull périodique à partir de {@code core.pull-interval}. */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor

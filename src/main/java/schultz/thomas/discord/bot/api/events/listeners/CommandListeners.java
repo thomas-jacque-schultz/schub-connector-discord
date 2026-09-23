@@ -16,10 +16,6 @@ public class CommandListeners extends ListenerAdapter  {
 
     private final CommandExecutorService commandExecutorService;
 
-    /**
-     * Listener for commands in discord
-     * only trigger when a user send a command
-     */
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) throws RuntimeException {
         if (filterMessage(event)) return;

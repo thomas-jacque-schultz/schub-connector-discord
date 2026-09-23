@@ -28,14 +28,7 @@ public class InternalSecretFilter extends OncePerRequestFilter {
     @Value("${schub.internal-secret}")
     private String internalSecret;
 
-    /**
-     * La sonde de santé reste joignable sans secret.
-     *
-     * <p>Sans cette exemption, le filtre rejette {@code /actuator/health} avant que le
-     * {@code permitAll} de la configuration de sécurité ne s'applique : Docker ne peut alors
-     * jamais déclarer le service sain, et tout ce qui l'attend reste à quai. La sonde n'expose
-     * que le statut — le détail est masqué par défaut.</p>
-     */
+    // Le filtre passe avant le permitAll de SecurityConfig : sans cette exemption, Docker ne voit jamais le service sain.
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getRequestURI().startsWith("/actuator/health");
@@ -48,7 +41,6 @@ public class InternalSecretFilter extends OncePerRequestFilter {
         String provided = request.getHeader(HEADER);
 
         if (matches(provided)) {
-            // Authentifie la requête comme venant du BFF
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     "bff-back", null, List.of(new SimpleGrantedAuthority("ROLE_INTERNAL"))
             );
@@ -61,11 +53,6 @@ public class InternalSecretFilter extends OncePerRequestFilter {
         }
     }
 
-    /**
-     * Comparaison à temps constant : {@code equals} sort au premier octet différent, et la
-     * durée de réponse fuit alors la longueur du préfixe correct — de quoi reconstituer le
-     * secret octet par octet. Même comparaison que dans les connecteurs (plan §5).
-     */
     private boolean matches(String provided) {
         if (provided == null) {
             return false;

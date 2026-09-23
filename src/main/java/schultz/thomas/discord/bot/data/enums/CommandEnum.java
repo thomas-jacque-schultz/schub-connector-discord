@@ -7,21 +7,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CommandEnum {
 
-    SUSBSCRIBE_A_CHANNEL("subscribe"),                      // start following a channel for righting or listening messages
+    SUSBSCRIBE_A_CHANNEL("subscribe"),
 
-    UPDATE_ALL_EXISTING_MESSAGES("refresh"),               // update all existing messages for all gaming servers
-    UPDATE_ALL_EXISTING_MESSAGES_SGAMING("refresh-server"),       // update all existing messages for one sGaming server
+    UPDATE_ALL_EXISTING_MESSAGES("refresh"),
+    UPDATE_ALL_EXISTING_MESSAGES_SGAMING("refresh-server"),
 
-    START_SGAMING("start"),                              // start sGaming server
-    STOP_SGAMING("pause"),                               // stop sGaming server
-
-    // create-gaming-server et update-gaming-server ont été retirées (plan §4) : une fiche se
-    // rédige, elle ne se dicte pas dans un chat. Le formulaire du front est plus complet, et
-    // /create n'exposait même pas le déploiement à lier — un serveur créé ainsi était inutilisable.
-
-    // create-user et update-user ont été retirées le 18-09 : le connecteur ne détient plus
-    // d'utilisateurs. Attribuer un rôle depuis un chat contournerait la règle qui interdit
-    // d'attribuer un rôle plus puissant que le sien, laquelle vit dans le cœur (plan §A.1).
+    START_SGAMING("start"),
+    STOP_SGAMING("pause"),
 
     REFRESH_GAMING_SERVER_MESSAGE("refresh-status");
 

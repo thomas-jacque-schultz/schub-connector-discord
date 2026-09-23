@@ -16,7 +16,6 @@ import schultz.thomas.discord.bot.data.enums.CommandEnum;
 import schultz.thomas.discord.bot.data.enums.PermissionEnum;
 
 
-/** Demande au cœur d'arrêter un serveur. Le connecteur n'arrête rien lui-même. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -52,8 +51,6 @@ public class StopServerGamingCommand implements Command {
             log.warn("Arrêt refusé par le cœur pour '{}' : {}", slug, e.getMessage());
             throw new CommandFailedException("Impossible d'arrêter le serveur de jeu");
         }
-        // Voir StartServerGamingCommand : le cœur a accepté, rien n'est encore constaté, et
-        // cette réponse-ci ne se met pas à jour.
         return "Commande reçue et transmise.";
     }
 }

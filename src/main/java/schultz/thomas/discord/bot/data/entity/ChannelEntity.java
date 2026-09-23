@@ -13,9 +13,9 @@ public class ChannelEntity {
     @Id
     private String id;
 
-    private String channelId;   // ref to discord channel id
-    private String name;        // ref to discord channel name
-    private String guildId;     // ref to discord server id
+    private String channelId;
+    private String name;
+    private String guildId;
 
     private List<MessageEntity> messages;
 }

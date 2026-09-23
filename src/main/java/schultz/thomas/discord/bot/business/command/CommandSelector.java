@@ -18,11 +18,10 @@ public class CommandSelector {
                 .collect(Collectors.toMap(command -> command.getEnum().getCommandName(), Function.identity()));
     }
 
-    public Command getCommand(String commandName /* message ?*/) {
+    public Command getCommand(String commandName ) {
         if(commands.containsKey(commandName)) {
             return commands.get(commandName);
         }
-        // Renvoyer command inconnue au bataillon
         return null;
     }
 
