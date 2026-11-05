@@ -1,28 +1,19 @@
-# Bot
+# schub-connector-discord
 
+Le bot Discord de **Schub** : il pilote les serveurs de jeu de la communauté Miam depuis Discord et tient à jour leurs messages dans les salons abonnés. PremadeLab a sa propre application Discord (`schub-connector-discord-premadelab`).
 
-    // Channel -> Server
-    // -> Event id - Message Id
-    // Mise à jour des messageEntity sur le server.
-    // (Command) event.getJda().getServerById()
-    // ServerMapper.map(...)
-    // Server.refreshMessage()
-
-
-In discord user ID format is `245281978054737920`
-
-# Command format
+## Format d'une commande
 
     /[command] [option1] [option2] [option3]
-    [  
+    [
         payloadLine1 : value1
         payloadLine2 : value2
         payloadLine3 : value3
     ]
 
-# Adding a Gaming Server Watcher
+Un identifiant Discord s'écrit comme `245281978054737920`.
 
-payload :
+## Ajouter le suivi d'un serveur de jeu
 
     identifier : [gaming-assetto]
     name : [Assetto Corsa]
@@ -30,5 +21,5 @@ payload :
     playersMax : [12]
     installation : [Download Modpack From Drive]
     version : [1.16]
-    description : [Course à paramétré sur l'interface Web]
-    admins : [Chacha | Pisel]
+    description : [Course à paramétrer sur l'interface web]
+    admins : [Pseudo1 | Pseudo2]
